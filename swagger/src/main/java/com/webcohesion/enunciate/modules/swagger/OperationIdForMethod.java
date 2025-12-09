@@ -35,6 +35,12 @@ public class OperationIdForMethod implements TemplateMethodModelEx {
 
   private static final Map<String, String> OPERATIONID_BY_SLUG = new TreeMap<String, String>();
 
+  private final boolean enforceUniqueOperationId;
+
+  public OperationIdForMethod(boolean enforceUniqueOperationId) {
+    this.enforceUniqueOperationId = enforceUniqueOperationId;
+  }
+
   public Object exec(List list) throws TemplateModelException {
     if (list.size() < 1) {
       throw new TemplateModelException("The operationIdFor method must have a parameter.");
@@ -50,6 +56,13 @@ public class OperationIdForMethod implements TemplateMethodModelEx {
         assignment = method.getDeveloperLabel();
         String root = assignment;
         Collection<String> assignments = OPERATIONID_BY_SLUG.values();
+        if (enforceUniqueOperationId && assignments.contains(assignment)) {
+          String errorMsg = String.format(
+              "This operationId is not unique: %s. " +
+              "Currently derived from=%s, previously seen=%s",
+              assignment, method.getSlug(), findExisting(assignment));
+          throw new IllegalStateException(errorMsg);
+        }
         while (assignments.contains(assignment)) {
           assignment = root + suffix++;
         }
@@ -61,6 +74,15 @@ public class OperationIdForMethod implements TemplateMethodModelEx {
     else {
       throw new IllegalStateException();
     }
+  }
+
+  private String findExisting(String assignment) {
+    for (Map.Entry<String, String> entry : OPERATIONID_BY_SLUG.entrySet()) {
+      if (entry.getValue().equals(assignment)) {
+        return entry.getKey();
+      }
+    }
+    return null;
   }
 
 }

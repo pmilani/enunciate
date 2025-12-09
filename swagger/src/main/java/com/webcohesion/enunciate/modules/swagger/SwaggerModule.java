@@ -235,7 +235,7 @@ public class SwaggerModule extends BasicGeneratingModule implements ApiFeaturePr
       model.put("constraintsFor", new ConstraintsForMethod());
       model.put("uniqueMediaTypesFor", new UniqueMediaTypesForMethod());
       model.put("jsonExampleFor", new JsonExampleForMethod());
-      model.put("operationIdFor", new OperationIdForMethod());
+      model.put("operationIdFor", new OperationIdForMethod(isEnforceUniqueOperationId()));
       model.put("responsesOf", new ResponsesOfMethod());
       model.put("validParametersOf", new ValidParametersMethod());
       model.put("definitionIdFor", new DefinitionIdForMethod());
@@ -267,6 +267,10 @@ public class SwaggerModule extends BasicGeneratingModule implements ApiFeaturePr
       swaggerArtifact.setPublic(false);
       SwaggerModule.this.enunciate.addArtifact(swaggerArtifact);
     }
+  }
+
+  private boolean isEnforceUniqueOperationId() {
+    return this.config.getBoolean("[@enforceUniqueOperationId]", false);
   }
 
   protected String getBasePath() {
